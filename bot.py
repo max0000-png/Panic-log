@@ -280,7 +280,19 @@ def main():
     app.add_handler(CommandHandler("codes", codes_command))
     app.add_handler(CommandHandler("tuto", tuto_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, log_text_received))
-    app.run_polling(allowed_updates=Update.ALL_TYPES)
+    WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "")
+    PORT = int(os.environ.get("PORT", 8080))
+    if WEBHOOK_URL:
+        logger.info(f"Bot démarré en mode webhook sur port {PORT}...")
+        app.run_webhook(
+            listen="0.0.0.0",
+            port=PORT,
+            url_path=BOT_TOKEN,
+            webhook_url=f"{WEBHOOK_URL}/{BOT_TOKEN}",
+        )
+    else:
+        logger.info("Bot démarré en mode polling...")
+        app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == "__main__":
